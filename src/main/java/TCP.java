@@ -4,12 +4,12 @@ public class TCP {
 	{
 		CLOSED,
 		LISTEN,
-		SYN_RCVD,
-		SYN_SENT,
 		ESTABLISHED,
+		SYN_SENT,
+		SYN_RCVD,
 		FIN_WAIT_1,
-		CLOSING,
 		FIN_WAIT_2,
+		CLOSING,
 		TIME_WAIT,
 		CLOSE_WAIT,
 		LAST_ACK
@@ -31,15 +31,17 @@ public class TCP {
 
 	
 	public static String traverseStates(String[] sa) {
-		
-		States currentState = States.LISTEN;
+
+		States currentState = States.CLOSED;
 		for (String s : sa) {
-			
-			currentState = getNextState(currentState, Action.valueOf(s));
+			try {
+				currentState = getNextState(currentState, Action.valueOf(s));
+			} catch (Exception e) {
+				return "ERROR";
+			}
 		}
 
-
-		
+		return currentState.toString();
 	}
 	
 	public static States getNextState(States currentState, Action action) throws Exception {
@@ -69,9 +71,9 @@ public class TCP {
 			if (action == Action.RCV_FIN) return States.CLOSE_WAIT;
 			break;
 		case FIN_WAIT_1 :
-			if (action == Action.RCV_FIN) return States.FIN_WAIT_1;
-			if (action == Action.RCV_FIN_ACK) return States.CLOSE_WAIT;
-			if (action == Action.RCV_ACK) return States.CLOSING;
+			if (action == Action.RCV_FIN) return States.CLOSING;
+			if (action == Action.RCV_FIN_ACK) return States.TIME_WAIT;
+			if (action == Action.RCV_ACK) return States.FIN_WAIT_2;
 			break;
 		case CLOSING :
 			if (action == Action.RCV_ACK) return States.TIME_WAIT;
